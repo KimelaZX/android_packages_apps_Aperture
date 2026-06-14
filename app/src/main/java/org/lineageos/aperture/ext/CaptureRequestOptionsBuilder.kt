@@ -23,6 +23,14 @@ private val FPS60_MTK_KEY_SESSION_PARAMETER = CaptureRequest.Key<Int>(
     "com.mediatek.streamingfeature.hfpsMode", Int::class.java
 )
 
+private val EIS_MTK_KEY_SESSION_PARAMETER = CaptureRequest.Key<Int>(
+    "com.mediatek.eisfeature.eismode", Int::class.java
+)
+
+private val EIS_PREVIEW_MTK_KEY_SESSION_PARAMETER = CaptureRequest.Key<Int>(
+    "com.mediatek.eisfeature.previeweis", Int::class.java
+)
+
 @androidx.camera.camera2.interop.ExperimentalCamera2Interop
 fun CaptureRequestOptions.Builder.setFrameRate(frameRate: FrameRate?) = apply {
     // Set or clear the standard target FPS range
@@ -41,8 +49,11 @@ fun CaptureRequestOptions.Builder.setFrameRate(frameRate: FrameRate?) = apply {
 }
 
 @androidx.camera.camera2.interop.ExperimentalCamera2Interop
-fun CaptureRequestOptions.Builder.setVideoStabilizationMode(videoStabilizationMode: VideoStabilizationMode) {
-    setCaptureRequestOption(
+fun CaptureRequestOptions.Builder.setVideoStabilizationMode(
+    videoStabilizationMode: VideoStabilizationMode?
+) = apply {
+    // Set or clear the standard video stabilization mode
+    setOrClearCaptureRequestOption(
         CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE,
         when (videoStabilizationMode) {
             VideoStabilizationMode.OFF -> CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_OFF
@@ -53,6 +64,26 @@ fun CaptureRequestOptions.Builder.setVideoStabilizationMode(videoStabilizationMo
                 } else {
                     CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON
                 }
+            null -> null
+        }
+    )
+
+    // Enable MediaTek EIS mode and EIS preview mode if needed
+    setOrClearCaptureRequestOption(
+        EIS_MTK_KEY_SESSION_PARAMETER, 
+        when (videoStabilizationMode) {
+            VideoStabilizationMode.OFF -> 0
+            VideoStabilizationMode.ON, VideoStabilizationMode.ON_PREVIEW -> 1
+            null -> null
+        }
+    )
+
+    setOrClearCaptureRequestOption(
+        EIS_PREVIEW_MTK_KEY_SESSION_PARAMETER, 
+        when (videoStabilizationMode) {
+            VideoStabilizationMode.OFF, VideoStabilizationMode.ON -> 0
+            VideoStabilizationMode.ON_PREVIEW -> 1
+            null -> null
         }
     )
 }
