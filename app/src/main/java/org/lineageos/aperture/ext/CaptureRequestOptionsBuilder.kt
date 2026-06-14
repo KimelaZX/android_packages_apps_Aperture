@@ -19,14 +19,24 @@ import org.lineageos.aperture.models.NoiseReductionMode
 import org.lineageos.aperture.models.ShadingMode
 import org.lineageos.aperture.models.VideoStabilizationMode
 
+private val FPS60_MTK_KEY_SESSION_PARAMETER = CaptureRequest.Key<Int>(
+    "com.mediatek.streamingfeature.hfpsMode", Int::class.java
+)
+
 @androidx.camera.camera2.interop.ExperimentalCamera2Interop
-fun CaptureRequestOptions.Builder.setFrameRate(frameRate: FrameRate?) {
+fun CaptureRequestOptions.Builder.setFrameRate(frameRate: FrameRate?) = apply {
+    // Set or clear the standard target FPS range
     frameRate?.let {
         setCaptureRequestOption(
             CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, it.range
         )
     } ?: run {
         clearCaptureRequestOption(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE)
+    }
+
+    // Enable MediaTek HFPS mode if needed
+    if (frameRate == FrameRate.FPS_60) {
+        setOrClearCaptureRequestOption(FPS60_MTK_KEY_SESSION_PARAMETER, 1)
     }
 }
 
